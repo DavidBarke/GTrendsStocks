@@ -1,0 +1,35 @@
+#' @export
+dow_jones_30 <- function() {
+  c(
+    "UNH",
+    "GS",
+    "HD",
+    "MSFT",
+    "MCD",
+    "AMGN",
+    "CAT",
+    "V",
+    "BA",
+    "HON",
+    "TRV",
+    "CRM",
+    "AXP",
+    "CVX",
+    "JNJ",
+    "AAPL",
+    "WMT",
+    "PG",
+    "JPM",
+    "IBM",
+    "NKE",
+    "MMM",
+    "DIS",
+    "MRK",
+    "KO",
+    "DOW",
+    "CSCO",
+    "VZ",
+    "WBA",
+    "INTC"
+  )
+}
