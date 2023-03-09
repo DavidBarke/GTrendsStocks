@@ -4,7 +4,7 @@
 \alias{int_split}
 \title{Split a time interval in chunks of same duration}
 \usage{
-int_split(int, chunk_duration = lubridate::months(6))
+int_split(int, chunk_duration = lubridate::days(180))
 }
 \arguments{
 \item{int}{An interval object}
