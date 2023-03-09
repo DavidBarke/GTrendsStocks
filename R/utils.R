@@ -47,3 +47,8 @@ google_trends_period <- function(level = c("daily", "weekly", "monthly")) {
     monthly = lubridate::years(4)
   )
 }
+
+as_hits <- function(x) {
+  x[x == "<1"] <- -1
+  as.numeric(x)
+}

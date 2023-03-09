@@ -126,7 +126,7 @@ download_trends <- function(
         )
       } else {
         trends <- trends %>% dplyr::mutate(
-          hits = as.numeric(hits),
+          hits = as_hits(hits),
           keyword = keyword,
           chunk = i
         ) %>%
