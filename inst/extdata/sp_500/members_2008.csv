@@ -1,0 +1,445 @@
+ticker,name
+EIX,Edison International
+FE,FirstEnergy Corp
+HD,Home Depot Inc/The
+WMT,Walmart Inc
+AVY,Avery Dennison Corp
+EMR,Emerson Electric Co
+M,Macy's Inc
+HAR,Harman International Industries Inc
+KSS,Kohl's Corp
+BBWI,Bath & Body Works Inc
+LOW,Lowe's Cos Inc
+CPPRQ,Old Copper Co Inc
+TJX,TJX Cos Inc/The
+AES,AES Corp/The
+ADSK,Autodesk Inc
+SBUX,Starbucks Corp
+JBL,Jabil Inc
+MCK,McKesson Corp
+ANF,Abercrombie & Fitch Co
+AMT,American Tower Corp
+RL,Ralph Lauren Corp
+NVDA,NVIDIA Corp
+SHLDQ,Sears Holdings Corp
+MU,Micron Technology Inc
+KATE,Kate Spade & Co LLC
+DDS,Dillard's Inc
+AA,Alcoa Corp
+AXP,American Express Co
+VZ,Verizon Communications Inc
+BA,Boeing Co/The
+CAT,Caterpillar Inc
+JPM,JPMorgan Chase & Co
+CVX,Chevron Corp
+KO,Coca-Cola Co/The
+DIS,Walt Disney Co/The
+XOM,Exxon Mobil Corp
+GE,General Electric Co
+HPQ,HP Inc
+IBM,International Business Machines Corp
+JNJ,Johnson & Johnson
+MCD,McDonald's Corp
+MRK,Merck & Co Inc
+MMM,3M Co
+BAC,Bank of America Corp
+PFE,Pfizer Inc
+PG,Procter & Gamble Co/The
+T,AT&T Inc
+TRV,Travelers Cos Inc/The
+RTX,Raytheon Technologies Corp
+CSCO,Cisco Systems Inc
+INTC,Intel Corp
+MSFT,Microsoft Corp
+MDLZ,Mondelez International Inc
+MTLQQ,Motors Liquidation Co
+CI,Cigna Group/The
+C,Citigroup Inc
+AIG,American International Group Inc
+HON,Honeywell International Inc
+MO,Altria Group Inc
+EKDKQ,Eastman Kodak Co
+IP,International Paper Co
+ABT,Abbott Laboratories
+AMD,Advanced Micro Devices Inc
+AFL,Aflac Inc
+APD,Air Products and Chemicals Inc
+AEP,American Electric Power Co Inc
+HES,Hess Corp
+APC,Anadarko Petroleum Corp
+ADI,Analog Devices Inc
+ADM,Archer-Daniels-Midland Co
+AZO,AutoZone Inc
+APA,APA Corp
+AVP,Avon Products Inc
+BHI,Baker Hughes Holdings LLC
+BALL,Ball Corp
+BK,Bank of New York Mellon Corp/The
+BCR,CR Bard Inc
+BAX,Baxter International Inc
+BDX,Becton Dickinson and Co
+BMS,Amcor Flexibles North America Inc
+BBY,Best Buy Co Inc
+HRB,H&R Block Inc
+BSX,Boston Scientific Corp
+BMY,Bristol-Myers Squibb Co
+BF,Brown-Forman Corp
+CPB,Campbell Soup Co
+CCL,Carnival Corp
+LUMN,Lumen Technologies Inc
+CLX,Clorox Co/The
+CMS,CMS Energy Corp
+CCEP,Coca-Cola Europacific Partners PLC
+CL,Colgate-Palmolive Co
+CMA,Comerica Inc
+CSC,Computer Sciences Corp
+CAG,Conagra Brands Inc
+ED,Consolidated Edison Inc
+BIG,Big Lots Inc
+CBE,Cooper Industries PLC
+GLW,Corning Inc
+CSX,CSX Corp
+CMI,Cummins Inc
+DHR,Danaher Corp
+TGT,Target Corp
+DE,Deere & Co
+D,Dominion Energy Inc
+DOV,Dover Corp
+DUK,Duke Energy Corp
+ETN,Eaton Corp PLC
+ECL,Ecolab Inc
+PKI,PerkinElmer Inc
+EMC,EMC Corp
+EOG,EOG Resources Inc
+AON,Aon PLC
+ETR,Entergy Corp
+EFX,Equifax Inc
+FDO,Family Dollar Stores Inc
+FDX,FedEx Corp
+F,Ford Motor Co
+NEE,NextEra Energy Inc
+BEN,Franklin Resources Inc
+FCX,Freeport-McMoRan Inc
+TGNA,TEGNA Inc
+GPS,Gap Inc/The
+GD,General Dynamics Corp
+GIS,General Mills Inc
+GPC,Genuine Parts Co
+GR,Goodrich Corp
+GT,Goodyear Tire & Rubber Co/The
+GWW,WW Grainger Inc
+HAL,Halliburton Co
+HOG,Harley-Davidson Inc
+HNZ,Kraft Heinz Foods Co
+HSY,Hershey Co/The
+HOT,Starwood Hotels & Resorts Worldwide LLC
+CNP,CenterPoint Energy Inc
+HUM,Humana Inc
+ITW,Illinois Tool Works Inc
+TT,Trane Technologies PLC
+IPG,Interpublic Group of Cos Inc/The
+IFF,International Flavors & Fragrances Inc
+K,Kellogg Co
+KMB,Kimberly-Clark Corp
+KIM,Kimco Realty Corp
+KR,Kroger Co/The
+LM,Legg Mason Inc
+LEG,Leggett & Platt Inc
+LEN,Lennar Corp
+JEF,Jefferies Financial Group Inc
+LLY,Eli Lilly & Co
+LNC,Lincoln National Corp
+XTO,XTO Energy Inc
+L,Loews Corp
+BDK,Black & Decker Corp/The
+XRX,Xerox Holdings Corp
+RX,IQVIA Inc
+HST,Host Hotels & Resorts Inc
+PBG,Pepsi Bottling Group Inc/The
+MMC,Marsh & McLennan Cos Inc
+BNI,Burlington Northern Santa Fe LLC
+MAS,Masco Corp
+SPGI,S&P Global Inc
+MDT,Medtronic PLC
+SGP,Schering-Plough Corp/Pre-merger with Merck & Co Inc
+CVS,CVS Health Corp
+WYE,Wyeth LLC
+MSI,Motorola Solutions Inc
+CITGQ,CIT Group Inc/Old
+MUR,Murphy Oil Corp
+ROH,Rohm and Haas Co
+LH,Laboratory Corp of America Holdings
+SOV,Santander Holdings USA Inc
+THC,Tenet Healthcare Corp
+NWL,Newell Brands Inc
+NEM,Newmont Corp
+MER,Merrill Lynch & Co Inc
+NCC,National City Corp
+NKE,NIKE Inc
+BRL,Barr Pharmaceuticals Inc
+NI,NiSource Inc
+AW,Allied Waste Industries LLC
+NBL,Noble Energy Inc
+NSC,Norfolk Southern Corp
+WWY,Wm Wrigley Jr Co
+NOC,Northrop Grumman Corp
+WFC,Wells Fargo & Co
+NUE,Nucor Corp
+OXY,Occidental Petroleum Corp
+OMC,Omnicom Group Inc
+CFC,Countrywide Financial Corp
+PCG,PG&E Corp
+PH,Parker-Hannifin Corp
+HET,Caesars Entertainment Corp/Old
+PPL,PPL Corp
+PEP,PepsiCo Inc
+EXC,Exelon Corp
+COP,ConocoPhillips
+PHM,PulteGroup Inc
+PNW,Pinnacle West Capital Corp
+PBI,Pitney Bowes Inc
+PCL,Plum Creek Timber Co Inc
+PNC,PNC Financial Services Group Inc/The
+PPG,PPG Industries Inc
+PCP,Precision Castparts Corp
+PGR,Progressive Corp/The
+PEG,Public Service Enterprise Group Inc
+RTN,Raytheon Co
+RHI,Robert Half International Inc
+RDC,Rowan Cos Ltd
+R,Ryder System Inc
+SWY,Safeway Inc
+HSH,Hillshire Brands Co/The
+SLB,Schlumberger NV
+SHW,Sherwin-Williams Co/The
+SNA,Snap-on Inc
+SO,Southern Co/The
+TFC,Truist Financial Corp
+LUV,Southwest Airlines Co
+SWK,Stanley Black & Decker Inc
+PSA,Public Storage
+STI,SunTrust Banks Inc
+SVU,SUPERVALU Inc
+SYY,Sysco Corp
+TER,Teradyne Inc
+ANDV,Andeavor
+TXT,Textron Inc
+TMO,Thermo Fisher Scientific Inc
+GL,Globe Life Inc
+JCI,Johnson Controls International plc
+UNP,Union Pacific Corp
+UNH,UnitedHealth Group Inc
+UNM,Unum Group
+MRO,Marathon Oil Corp
+X,United States Steel Corp
+VAR,Varian Medical Systems Inc
+VFC,VF Corp
+VNO,Vornado Realty Trust
+VMC,Vulcan Materials Co
+WBA,Walgreens Boots Alliance Inc
+GHC,Graham Holdings Co
+WY,Weyerhaeuser Co
+WHR,Whirlpool Corp
+WMB,Williams Cos Inc/The
+TEG,Integrys Energy Group Inc
+ADBE,Adobe Inc
+AMGN,Amgen Inc
+AAPL,Apple Inc
+CTAS,Cintas Corp
+CMCSA,Comcast Corp
+TAP,Molson Coors Beverage Co
+KLAC,KLA Corp
+MKC,McCormick & Co Inc/MD
+MOLX,Molex LLC/US
+JWN,Nordstrom Inc
+ORCL,Oracle Corp
+PCAR,PACCAR Inc
+COST,Costco Wholesale Corp
+SIAL,Sigma-Aldrich Corp
+STJ,St Jude Medical Inc
+SYK,Stryker Corp
+TSN,Tyson Foods Inc
+AMAT,Applied Materials Inc
+TWX,Time Warner Inc
+BBBY,Bed Bath & Beyond Inc
+CAH,Cardinal Health Inc
+CELG,Celgene Corp
+CINF,Cincinnati Financial Corp
+CVH,Coventry Health Care Inc
+DHI,DR Horton Inc
+EA,Electronic Arts Inc
+ESRX,Evernorth Health Inc
+EXPD,Expeditors International of Washington Inc
+MTB,M&T Bank Corp
+FISV,Fiserv Inc
+FITB,Fifth Third Bancorp
+FHN,First Horizon Corp
+GILD,Gilead Sciences Inc
+HBAN,Huntington Bancshares Inc/OH
+BIIB,Biogen Inc
+LLTC,Linear Technology Corp
+RRC,Range Resources Corp
+NBR,Nabors Industries Ltd
+NEBLQ,Noble Holding Corp PLC
+NTRS,Northern Trust Corp
+PAYX,Paychex Inc
+PDCO,Patterson Cos Inc
+QCOM,QUALCOMM Inc
+AN,AutoNation Inc
+KEY,KeyCorp
+SPLS,Staples Inc
+STT,State Street Corp
+USB,US Bancorp
+GEN,Gen Digital Inc
+TROW,T Rowe Price Group Inc
+WM,Waste Management Inc
+PARA,Paramount Global
+AGN,Allergan Ltd/Ireland
+WFM,Whole Foods Market Inc
+STZ,Constellation Brands Inc
+XLNX,Xilinx Inc
+ZION,Zions Bancorp NA
+INTU,Intuit Inc
+MS,Morgan Stanley
+MCHP,Microchip Technology Inc
+CB,Chubb Ltd
+CHKAQ,Chesapeake Energy Corp
+ALL,Allstate Corp/The
+EQR,Equity Residential
+VIAV,Viavi Solutions Inc
+SPG,Simon Property Group Inc
+EMN,Eastman Chemical Co
+AVB,AvalonBay Communities Inc
+PRU,Prudential Financial Inc
+UPS,United Parcel Service Inc
+AIV,Apartment Investment and Management Co
+APOL,Apollo Education Group Inc
+DFODQ,Dean Foods Co
+LMT,Lockheed Martin Corp
+ABC,AmerisourceBergen Corp
+COF,Capital One Financial Corp
+WAT,Waters Corp
+DRI,Darden Restaurants Inc
+SNDK,SanDisk LLC
+LXK,Lexmark International Inc
+NTAP,NetApp Inc
+CTXS,Citrix Systems Inc
+FHI,Federated Hermes Inc
+HIG,Hartford Financial Services Group Inc/The
+EL,Estee Lauder Cos Inc/The
+PFG,Principal Financial Group Inc
+TIE,Titanium Metals Corp
+ATI,ATI Inc
+ETFC,E*TRADE Financial Corp
+NOV,NOV Inc
+DGX,Quest Diagnostics Inc
+ROK,Rockwell Automation Inc
+AMZN,Amazon.com Inc
+BXP,Boston Properties Inc
+VLO,Valero Energy Corp
+WU,Western Union Co/The
+CHRW,CH Robinson Worldwide Inc
+YUM,Yum! Brands Inc
+VRSN,VeriSign Inc
+AEE,Ameren Corp
+BRCM,Broadcom Corp
+MAR,Marriott International Inc/MD
+SEE,Sealed Air Corp
+CTSH,Cognizant Technology Solutions Corp
+CNX,CNX Resources Corp
+AET,Aetna Inc
+BTUUQ,Peabody Energy Corp
+EBAY,eBay Inc
+GS,Goldman Sachs Group Inc/The
+SRE,Sempra Energy
+MCO,Moody's Corp
+AKAM,Akamai Technologies Inc
+RAI,Reynolds American Inc
+DVN,Devon Energy Corp
+GOOGL,Alphabet Inc
+HCBK,Hudson City Bancorp Inc
+A,Agilent Technologies Inc
+ELV,Elevance Health Inc
+DTE,DTE Energy Co
+TXN,Texas Instruments Inc
+COV,Covidien Ltd
+TLAB,Infinera Optical Holding Inc
+SUNEQ,SunEdison Inc
+MET,MetLife Inc
+FTRCQ,Frontier Communications Corp
+TPR,Tapestry Inc
+FLR,Fluor Corp
+SLM,SLM Corp
+VIAB,Viacom Inc
+AMP,Ameriprise Financial Inc
+JNS,Janus Henderson US Holdings Inc
+XEL,Xcel Energy Inc
+ITT,ITT Inc
+COL,Collins Aerospace
+ZBH,Zimmer Biomet Holdings Inc
+CBRE,CBRE Group Inc
+RSHCQ,RS Legacy Corp
+GME,GameStop Corp
+NOVL,Micro Focus Software Inc
+ICE,Intercontinental Exchange Inc
+GENZ,Genzyme Corp
+FIS,Fidelity National Information Services Inc
+MWV,WestRock MWV LLC
+AYE,Allegheny Energy Inc
+POM,Pepco Holdings LLC
+QLGC,QLogic LLC
+MHS,Medco Health Solutions Inc
+MDP,Hawkeye Acquisition Inc
+HAS,Hasbro Inc
+NYT,New York Times Co/The
+HSP,Hospira Inc
+KG,KP Pharmaceuticals LLC
+AIZ,Assurant Inc
+PTV,Pactiv LLC
+GNW,Genworth Financial Inc
+RF,Regions Financial Corp
+TDC,Teradata Corp
+EXPE,Expedia Group Inc
+SCHW,Charles Schwab Corp/The
+TNL,Travel + Leisure Co
+VALPQ,Valaris plc
+KBH,KB Home
+TEL,TE Connectivity Ltd
+MBI,MBIA Inc
+DFS,Discover Financial Services
+DYNIQ,Dynegy Inc/Old
+CIEN,Ciena Corp
+CVG,Convergys Corp
+WINMQ,Windstream Holdings Inc
+JNPR,Juniper Networks Inc
+BMC,BMC Software Inc
+MAT,Mattel Inc
+MTW,Manitowoc Co Inc/The
+RRD,RR Donnelley & Sons Co
+SITC,SITE Centers Corp
+JNY,Jones Group Inc/NY
+ACAS,ACAS LLC
+WFTIQ,Weatherford International PLC
+MYL,Mylan NV
+TFCFA,TFCF Corp
+RIG,Transocean Ltd
+ASH,Ashland Inc
+HPC,Hercules LLC
+GGP,Brookfield Property REIT Inc
+UIS,Unisys Corp
+MWW,Monster Worldwide Inc
+TEX,Terex Corp
+MTG,MGIC Investment Corp
+ADP,Automatic Data Processing Inc
+WAMUQ,Washington Mutual Inc
+LEHMQ,Lehman Brothers Holdings Inc
+FMCC,Federal Home Loan Mortgage Corp
+FNMA,Federal National Mortgage Association
+CME,CME Group Inc
+SSP,EW Scripps Co/The
+OMX,OfficeMax Inc
+BC,Brunswick Corp/DE
+ABKFQ,Ambac Financial Group Inc/Old
+CA,CA Inc
+CCTYQ,Circuit City Stores Inc
+SNV,Synovus Financial Corp
