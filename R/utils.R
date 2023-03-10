@@ -55,9 +55,11 @@ as_hits <- function(x, less_than_one = -1) {
 
 switch_cookies <- function() {
   # Print current cookies
-  str(curl::handle_cookies(gtrendsR:::.pkgenv$cookie_handler))
+  if (exists("cookie_handler", envir = gtrendsR:::.pkgenv)) {
+    str(curl::handle_cookies(gtrendsR:::.pkgenv$cookie_handler))
+  }
   cookie_env <- gtrendsR:::.pkgenv
   rm("cookie_handler", envir = cookie_env)
   # Assume that TOR is running on 9050
-  assign("handle_proxyhost", "socks5://localhost:9050")
+  assign("handle_proxyhost", "socks5://localhost:9050", envir = gtrendsR:::.pkgenv)
 }
