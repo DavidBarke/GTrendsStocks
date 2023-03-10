@@ -101,8 +101,13 @@ download_trends <- function(
   end_date <- lubridate::int_end(int)
   ints <- int_split(int, chunk_duration = chunk_duration)
 
+  # Get new cookies for every download
+  # switch_cookies()
+
   purrr::map_dfr(keywords, function(keyword) {
     purrr::map2_dfr(ints, seq_along(ints), function(int, i) {
+      print(glue::glue("Download {keywords} at {int}"))
+
       trends <- gtrendsR::gtrends(
         keyword = keyword,
         geo = geo,
@@ -136,7 +141,7 @@ download_trends <- function(
           )
       }
 
-      Sys.sleep(1)
+      #Sys.sleep(1)
       trends
     })
   })
