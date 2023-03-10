@@ -20,7 +20,7 @@ pb <- progress::progress_bar$new(
 )
 
 pwalk(
-  sp_500() %>% filter(first_year < 2023, ticker > "CNX"), 
+  sp_500() %>% filter(first_year < 2023, ticker >= "M", ticker < "T"), 
   function(ticker, name, first_year, last_year
 ) {
   pb$tick(tokens = list(ticker = ticker, name = name))

@@ -48,7 +48,16 @@ google_trends_period <- function(level = c("daily", "weekly", "monthly")) {
   )
 }
 
-as_hits <- function(x) {
-  x[x == "<1"] <- -1
+as_hits <- function(x, less_than_one = -1) {
+  x[x == "<1"] <- less_than_one
   as.numeric(x)
+}
+
+switch_cookies <- function() {
+  # Print current cookies
+  str(curl::handle_cookies(gtrendsR:::.pkgenv$cookie_handler))
+  cookie_env <- gtrendsR:::.pkgenv
+  rm("cookie_handler", envir = cookie_env)
+  # Assume that TOR is running on 9050
+  assign("handle_proxyhost", "socks5://localhost:9050")
 }
