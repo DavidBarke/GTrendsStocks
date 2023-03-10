@@ -22,11 +22,38 @@ stocks <- map(LETTERS, function(first_letter) {
     str_extract("\\w+")
 }) %>% list_c
 
-walk(stocks[stocks > "CIN"], function(stock) {
+walk(stocks, function(stock) {
   first_letter <- substr(stock, 1, 1)
   trends <- read_rds(glue("./../trends/sp_500_raw/{first_letter}/{stock}.rds")) %>%
     scale_trends() %>%
     save_trends(glue("{stock}.rds"), basedir = "./../trends/sp_500_scaled")
+})
+
+walk(stocks, function(stock) {
+  first_letter <- substr(stock, 1, 1)
+  file.rename(
+    glue("./../trends/sp_500_scaled/{first_letter}/{stock}.rds.rds"),
+    glue("./../trends/sp_500_scaled/{first_letter}/{stock}.rds")
+  )
+})
+```
+
+# Merge Individual Trends
+
+```{r}
+library(purrr)
+library(stringr)
+library(readr)
+library(glue)
+
+stocks <- map(LETTERS, function(first_letter) {
+  dir(paste0("./../trends/sp_500_scaled/", first_letter)) %>%
+    str_extract("\\w+")
+}) %>% list_c
+
+trends <- map_dfr(stocks, function(stock) {
+  first_letter <- substr(stock, 1, 1)
+  read_rds(glue("./../trends/sp_500_scaled/{first_letter}/{stock}.rds"))
 })
 ```
 
