@@ -169,13 +169,20 @@ scale_trends <- function(trends) {
       dplyr::pull(score)
 
     scaling_factor <- mean(scores_1 / scores_2, na.rm = TRUE)
+    if (is.nan(scaling_factor)) scaling_factor <- 1
 
     if (scaling_factor > 1) {
       trends[trends$chunk <= chunk_1, ]$score <-
         trends[trends$chunk <= chunk_1, ]$score / scaling_factor
+
+      trends <- trends %>%
+        filter(!(date %in% overlapping_dates & chunk == chunk_2))
     } else {
       trends[trends$chunk == chunk_2, ]$score <-
         trends[trends$chunk == chunk_2, ]$score * scaling_factor
+
+      trends <- trends %>%
+        filter(!(date %in% overlapping_dates & chunk == chunk_1))
     }
   }
 

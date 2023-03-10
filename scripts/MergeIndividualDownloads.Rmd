@@ -1,0 +1,32 @@
+---
+title: "MergeIndividualDownloads"
+author: "David Barkemeyer"
+date: "2023-03-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Scale Individual Trends
+
+```{r}
+library(purrr)
+library(stringr)
+library(readr)
+library(glue)
+
+stocks <- map(LETTERS, function(first_letter) {
+  dir(paste0("./../trends/sp_500_raw/", first_letter)) %>%
+    str_extract("\\w+")
+}) %>% list_c
+
+walk(stocks[stocks > "CIN"], function(stock) {
+  first_letter <- substr(stock, 1, 1)
+  trends <- read_rds(glue("./../trends/sp_500_raw/{first_letter}/{stock}.rds")) %>%
+    scale_trends() %>%
+    save_trends(glue("{stock}.rds"), basedir = "./../trends/sp_500_scaled")
+})
+```
+
