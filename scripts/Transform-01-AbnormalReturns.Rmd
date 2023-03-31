@@ -1,0 +1,257 @@
+---
+title: "AbnormalReturns"
+author: "David Barkemeyer"
+date: "2023-03-13"
+output: html_document
+params: 
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load packages
+
+```{r}
+library(lubridate)
+library(readr)
+library(yaml)
+```
+
+# Load data
+
+```{r}
+compustat <- read_rds("./../large_data/compustat.rds")
+
+options <- read_yaml(params$options)
+
+crsp_trends <- read_rds(
+  file.path("./../large_data", paste_time0(options), "crsp_trends.rds")
+)
+
+crsp_monthly <- read_rds("./../large_data/crsp_monthly.rds")
+```
+
+# Select relevant columns
+
+```{r}
+crsp_trends <- crsp_trends %>%
+  select(
+    date, dly_attention, ticker, exchange, prc, shares_outstanding, ret, volume,
+    market_cap
+  )
+```
+
+# Size as of last trading day in June
+
+```{r}
+size <- crsp_trends %>%
+  filter(
+    month(date) == 6,
+    !is.na(ret)
+  ) %>%
+  mutate(period = year(date)) %>%
+  group_by(ticker, period) %>%
+  filter(day(date) == max(day(date))) %>%
+  mutate(
+    period = year(date),
+    size = prc * shares_outstanding
+  ) %>%
+  select(ticker, period, size) %>%
+  ungroup()
+```
+
+# Book-to-market
+
+```{r}
+book_to_market <- compustat %>%
+  mutate(period = year(date) + 1) %>%
+  select(ticker, period, book_to_market)
+```
+
+
+# Proxy momentum through annual return of the previous twelve months
+
+Annual return is computed from monthly returns from June of the previous year to May of the current year.
+
+```{r}
+momentum_period <- function(y, m) {
+  # month greater than or equal to June -> count towards next year
+  # month less than or equal to May -> count towards current year
+  ifelse(m >= 6, y + 1, y)
+}
+
+momentum <- crsp_monthly %>%
+  mutate(period = momentum_period(year(date), month(date))) %>%
+  group_by(ticker, period) %>%
+  summarise(momentum = average_return(ret)) %>% 
+  suppressMessages() %>%
+  ungroup()
+```
+
+# Join the three characteristics data sets
+
+```{r}
+factors <- inner_join(size, book_to_market, by = c("ticker", "period")) %>%
+  inner_join(momentum, by = c("ticker", "period"))
+```
+
+# Join the factors with CRSP & trends data
+
+```{r}
+portfolio_period <- function(date) {
+  # month greater than or equal to July -> count towards this year
+  # month less than or equal to June -> count towards last year
+  ifelse(month(date) >= 7, year(date), year(date) - 1)
+}
+
+# Prepare crsp_trends for join
+ct <- crsp_trends %>%
+  mutate(period = portfolio_period(date)) %>%
+  select(-prc, -shares_outstanding)
+
+data <- inner_join(ct, factors, by = c("ticker", "period"))
+```
+
+# For each period form quintiles on size, book-to-market and momentum (dependent sort)
+
+## Portfolios on size
+
+To follow the approach of Daniel et al. (1997) the size quintiles are computed based on NYSE stocks.
+
+```{r}
+probs <- seq(0, 1, by = 0.2) # quintile probabilities
+
+# Compute size quintiles per twelve-month period
+size_quintiles <- data %>%
+  filter(exchange == "N") %>%
+  select(date, period, ticker, size) %>%
+  group_by(period) %>%
+  summarise(size_5 = list(quantile(size, probs = probs)))
+
+# Join size quintiles to ticker-period-size data
+data_2 <- data %>%
+  select(ticker, period, size, book_to_market, momentum) %>%
+  distinct() %>%
+  inner_join(size_quintiles, by = "period")
+
+# Compute bin in which ticker-size combination is put per period
+data_3 <- data_2 %>%
+  rowwise() %>%
+  mutate(size_q = findInterval(size, size_5, all.inside = T)) %>%
+  ungroup() %>%
+  select(-size_5)
+```
+
+## Portfolios on book-to-market
+
+Form five portfolios on book-to-market within each of the five size portfolios
+
+```{r}
+# Compute book_to_market quintiles
+book_to_market_quintiles <- data_3 %>%
+  filter(!is.na(book_to_market)) %>%
+  group_by(size_q, period) %>%
+  summarise(
+    book_to_market_5 = list(quantile(book_to_market, probs = probs))
+  ) %>%
+  suppressMessages()
+
+# Join book-to-market quintiles to ticker-period-size_q data
+data_4 <- data_3 %>%
+  inner_join(book_to_market_quintiles, by = c("period", "size_q"))
+
+# Compute bin in which ticker-size_q-book_to_market combination is put per period
+data_5 <- data_4 %>%
+  rowwise() %>%
+  mutate(
+    book_to_market_q = findInterval(
+      book_to_market, book_to_market_5, all.inside = T
+    )
+  ) %>%
+  ungroup() %>%
+  select(-book_to_market_5)
+```
+
+## Portfolios on momentum
+
+```{r}
+# Compute momentum quintiles
+momentum_quintiles <- data_5 %>%
+  filter(!is.na(momentum)) %>%
+  group_by(period, size_q, book_to_market_q) %>%
+  summarise(momentum_5 = list(quantile(momentum, probs = probs))) %>%
+  suppressMessages()
+
+# Join momentum quintiles to ticker-period-size_q data
+data_6 <- data_5 %>%
+  inner_join(
+    momentum_quintiles, 
+    by = c("period", "size_q", "book_to_market_q")
+  )
+
+# Compute bin in which ticker-size_q-momentum combination is put per period
+data_7 <- data_6 %>%
+  rowwise() %>%
+  mutate(momentum_q = findInterval(momentum, momentum_5, all.inside = T)) %>%
+  ungroup() %>%
+  select(-momentum_5)
+```
+
+# Merge portfolio information with CRSP & trend data
+
+```{r}
+ct_2 <- ct %>%
+  inner_join(data_7, by = c("ticker", "period"))
+```
+
+# Compute portfolio returns
+
+```{r}
+ct_3 <- ct_2 %>%
+  group_by(period, size_q, book_to_market_q, momentum_q) %>%
+  mutate(pf_ret = mean(ret, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+# Compute abnormal returns
+
+```{r}
+ct_4 <- ct_3 %>%
+  mutate(abn_ret = ret - pf_ret)
+```
+
+# Compute time-aggregated returns
+
+```{r}
+# Add column to data containing the number of weeks since Sunday, 1999-12-27
+ct_5 <- ct_4 %>%
+  mutate(
+    n_weeks = difftime(date, as.Date("1999-12-27")) %>% as.numeric %/% 7
+  )
+
+ct_6 <- ct_5 %>%
+  group_by(ticker, n_weeks) %>%
+  mutate(
+    weekly_abn_ret = average_return(abn_ret)
+  ) %>%
+  group_by(ticker, period) %>%
+  mutate(
+    period_abn_ret = average_return(abn_ret)
+  ) %>%
+  ungroup()
+```
+
+
+# Save data set
+
+```{r}
+write_rds(
+  ct_6, 
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-01-AbnormalReturns.rds"
+  )
+)
+```
+

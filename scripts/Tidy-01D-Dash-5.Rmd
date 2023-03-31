@@ -1,0 +1,139 @@
+---
+title: "Tidy-01-Dash-5"
+author: "David Barkemeyer"
+date: "2023-03-25"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages
+
+```{r}
+library(stringr)
+library(readr)
+library(purrr)
+library(progress)
+library(GTrendsStocks)
+library(lubridate)
+```
+
+# Sources
+
+## SEC
+
+https://www.sec.gov/rules/final/34-43590.htm
+https://www.sec.gov/interps/legal/slbim12a.htm
+https://www.sec.gov/interps/legal/slbim12rappxa.htm
+
+## NYSE
+
+https://www.nyse.com/markets/nyse-national/reports
+https://www.nyse.com/markets/reports/disclosure-of-order-execution/archives
+
+## NASDAQ
+
+http://www.nasdaqtrader.com/Trader.aspx?id=SECRule605Report
+
+# Import
+
+```{r}
+is_file_type <- function(x, file_type) {
+  str_extract(x, "\\w+$") == file_type
+}
+
+# NYSE
+base_path <- "./../large_data/Dash-5/NYSE"
+files <- dir(base_path)
+
+walk(files[is_file_type(files, "zip")], function(x) {
+  unzip(file.path(base_path, x), exdir = base_path)
+})
+
+df_files <- files[is_file_type(files, "txt") | is_file_type(files, "DAT")]
+pb <- progress_bar$new(total = length(df_files))
+df <- map_df(df_files, function(x) {
+  pb$tick()
+  
+  read_delim(
+    file.path(base_path, x), 
+    delim = "|", 
+    col_names = col_names_605(),
+    show_col_types = FALSE
+  )
+})
+```
+
+# Enrich information by adding factors
+
+```{r}
+df_2 <- df %>%
+  mutate(
+    designated_participant = factor(
+      designated_participant,
+      levels = c("A", "B", "M", "C", "T", "N", "P", "X"),
+      labels = c("Amex", "BSE", "CHX", "CSE", "NASD", "NYSE", "PCX", "Phlx")
+    ),
+    order_type = factor(
+      order_type,
+      levels = 11:15,
+      labels = c(
+        "Market order", 
+        "Marketable limit order", 
+        "Inside-the-quote limit order",
+        "At-the-quote limit order",
+        "Near-the-quote limit order"
+      )
+    ),
+    order_size = factor(
+      order_size,
+      levels = 21:24,
+      labels = c(
+        "100-499 shares",
+        "500-1999 shares",
+        "2000-4999 shares",
+        "5000-9999 shares"
+      )
+    )
+  )
+```
+
+# Extract year and month
+
+```{r}
+df_3 <- df_2 %>%
+  mutate(
+    date = ym(date),
+    year = year(date),
+    month = month(date)
+  ) %>%
+  select(-date)
+```
+
+# Select relevant columns
+
+```{r}
+df_4 <- df_3 %>%
+  select(
+    year,
+    month,
+    designated_participant,
+    market_center,
+    ticker,
+    order_type,
+    order_size,
+    total_covered_orders,
+    total_covered_shares
+  )
+```
+
+# Save data
+
+```{r}
+write_rds(df_4, "./../large_data/dash-5.rds")
+```
+
+
+

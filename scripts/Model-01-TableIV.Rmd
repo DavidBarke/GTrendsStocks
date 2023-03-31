@@ -1,0 +1,89 @@
+---
+title: "Model-01-TableIV"
+author: "David Barkemeyer"
+date: "2023-03-28"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Partial replication of Da et. al (2011): Table IV
+
+## Packages
+
+```{r, message=FALSE}
+library(GTrendsStocks)
+library(readr)
+library(zoo)
+library(plm)
+library(lmtest)
+library(yaml)
+
+options <- read_yaml(params$options)
+```
+
+## Import
+
+```{r}
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-03-AbnormalTurnover.rds"
+  )
+)
+```
+
+## Weekly Regression
+
+```{r}
+weekly_df <- df %>%
+  group_by(n_weeks, ticker) %>%
+  summarise(
+    weekly_asvi = weekly_asvi[1],
+    size = size[1],
+    weekly_abn_ret = weekly_abn_ret[1],
+    weekly_abn_turnover = sum(abn_turnover, na.rm = T)
+  ) %>%
+  distinct(n_weeks, ticker, .keep_all = T) %>%
+  filter(!is.na(weekly_asvi), is.finite(weekly_asvi)) %>%
+  mutate(intercept = 1) %>%
+  mutate(
+    weekly_abn_turnover = weekly_abn_turnover / sd(weekly_abn_turnover),
+    weekly_abn_ret = weekly_abn_ret / sd(weekly_abn_ret),
+    size = size / sd(size)
+  )
+
+weekly_mod <- plm(
+  weekly_asvi ~ intercept + log(size) + abs(weekly_abn_ret) + weekly_abn_turnover,
+  data = weekly_df,
+  index = c("ticker", "n_weeks"),
+  effect = "time",
+  model = "pooling"
+)
+
+summary(weekly_mod)
+```
+
+## Daily regression
+
+```{r}
+dly_df <- df %>%
+  filter(!is.na(dly_asvi)) %>%
+  distinct(date, ticker, .keep_all = T) 
+
+dly_mod <- plm(
+  dly_asvi ~ log(size) + abs(abn_ret) + I(abn_turnover / 1e6),
+  data = dly_df,
+  index = c("ticker", "date"),
+  effect = "time",
+  model = "pooling"
+)
+
+summary(dly_mod)
+```
+
+
+

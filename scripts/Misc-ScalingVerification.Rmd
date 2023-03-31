@@ -1,0 +1,62 @@
+---
+title: "ScalingVerification"
+author: "David Barkemeyer"
+date: "2023-03-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(lubridate)
+library(GTrendsStocks)
+library(tibble)
+
+int <- interval("2018-01-01", "2022-12-31")
+AAPL_raw <- download_trends("AAPL stock", int)
+AAPL_scaled <- scale_trends(AAPL_raw)
+AAPL_weekly <- gtrends(
+  "AAPL stock", "US", "2018-01-01 2022-12-31", onlyInterest = T
+)$interest_over_time %>%
+  as_tibble() %>%
+  select(score = hits, date)
+```
+
+```{r}
+library(ggplot2)
+
+ints <- int_split(int, chunk_duration = days(160))
+end_dates <- int_end(ints) + days(80)
+
+p_raw <- plot_search_volume(AAPL_raw) +
+  geom_vline(
+    xintercept = end_dates[end_dates < as.Date("2022-12-31")], 
+    linetype = "dashed", 
+    linewidth = .2
+  ) +
+  scale_x_datetime(
+    breaks = as_datetime(c("2019-01-01", "2020-01-01", "2021-01-01", "2022-01-01")), 
+    labels = 2019:2022,
+    expand = c(0, 0))
+
+p_scaled <- plot_search_volume(AAPL_scaled) +
+  scale_x_datetime(
+    breaks = as_datetime(c("2019-01-01", "2020-01-01", "2021-01-01", "2022-01-01")), 
+    labels = 2019:2022,
+    expand = c(0, 0)
+  )
+
+p_weekly <- plot_search_volume(AAPL_weekly) +
+  scale_x_datetime(
+    breaks = as_datetime(c("2019-01-01", "2020-01-01", "2021-01-01", "2022-01-01")), 
+    labels = 2019:2022,
+    expand = c(0, 0)
+  )
+
+ggsave("./../figures/AAPL_raw.png", p_raw, "png", units = "cm", width = 12, height = 6)
+ggsave("./../figures/AAPL_scaled.png", p_scaled, "png", units = "cm", width = 12, height = 6)
+ggsave("./../figures/AAPL_weekly.png", p_weekly, "png", units = "cm", width = 12, height = 6)
+```
+

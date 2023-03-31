@@ -1,0 +1,93 @@
+---
+title: "Tidy-02-Join-Daily"
+author: "David Barkemeyer"
+date: "2023-03-12"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Join of Trends and Daily CRSP
+
+```{r}
+library(lubridate)
+library(readr)
+library(zoo)
+library(yaml)
+
+options <- read_yaml(params$options)
+
+crsp_daily <- read_rds("./../large_data/crsp_daily.rds")
+trends <- read_rds(
+  file.path("./../large_data", paste_time0(options), "trends.rds")
+)
+
+df <- full_join(trends, crsp_daily, by = c("date", "ticker"))
+
+names(df)
+```
+
+# Arrange by ticker and date
+
+```{r}
+df_2 <- df %>%
+  arrange(ticker, date)
+```
+
+# Remove ticker for which no CRSP data exists
+
+```{r}
+df_3 <- df_2 %>%
+  group_by(ticker) %>%
+  mutate(no_crsp = all(is.na(ret))) %>%
+  ungroup() %>%
+  filter(!no_crsp)
+```
+
+# Replace NAs in (nearly) static columns with previous observations
+
+These (nearly) static columns are from the CRSP data and are therefore NA on
+non-trading days. However, because they are (nearly) static it is safe to
+replace them with their previous non-NA value.
+
+```{r}
+df_4 <- df_3 %>%
+  group_by(ticker) %>%
+  mutate(
+    across(
+      c(start_date, end_date, exchange, industry),
+      ~ na.locf(na.locf(., na.rm = F), fromLast = T)
+    )
+  ) %>%
+  ungroup()
+```
+
+# Remove observations before start date or after end date
+
+```{r}
+df_5 <- df_4 %>%
+  filter(date >= start_date, date <= end_date)
+```
+
+# Market Capitalization (Size)
+
+```{r}
+df_6 <- df_5 %>%
+  mutate(
+    market_cap = prc * shares_outstanding
+  )
+```
+
+# Save Data
+
+```{r}
+write_rds(
+  df_6, 
+  file.path("./../large_data", paste_time0(options), "crsp_trends.rds")
+)
+```
+

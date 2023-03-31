@@ -1,0 +1,134 @@
+---
+title: "Misc-AggregateSearchVolume"
+author: "David Barkemeyer"
+date: "2023-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load data
+
+```{r}
+library(GTrendsStocks)
+library(readr)
+library(dplyr)
+
+df <- read_rds("./../large_data/Transform-02-AbnormalAttention.rds")
+```
+
+# Aggregate search volume
+
+```{r}
+agg_dly_attention <- df %>%
+  filter(!is.na(dly_attention)) %>%
+  group_by(date) %>%
+  summarise(
+    agg_dly_attention = mean(dly_attention),
+    agg_dly_attention_weighted = weighted.mean(dly_attention, size),
+    ntr = all(is.na(ret))
+  )
+
+agg_dly_attention_ntr <- agg_dly_attention %>%
+  filter(!ntr)
+```
+
+```{r}
+p_agg_dly_attention <- plot_search_volume(
+  agg_dly_attention, y = "agg_dly_attention"
+) +
+  scale_x_date(expand = c(0, 0))
+  
+
+p_agg_dly_attention_weighted <- plot_search_volume(
+  agg_dly_attention, y = "agg_dly_attention_weighted"
+) + 
+  scale_x_date(expand = c(0, 0))
+
+p_agg_dly_attention_ntr <- plot_search_volume(
+  agg_dly_attention_ntr, y = "agg_dly_attention"
+) +
+  scale_x_date(expand = c(0, 0))
+  
+
+p_agg_dly_attention_weighted_ntr <- plot_search_volume(
+  agg_dly_attention_ntr, y = "agg_dly_attention_weighted"
+) + 
+  scale_x_date(expand = c(0, 0))
+
+ggsave(
+  "./../figures/agg_dly_attention.png", 
+  p_agg_dly_attention, 
+  "png", 
+  units = "cm", 
+  width = 9, 
+  height = 4.5
+)
+
+ggsave(
+  "./../figures/agg_dly_attention_weighted.png", 
+  p_agg_dly_attention_weighted, 
+  "png", 
+  units = "cm", 
+  width = 9, 
+  height = 4.5
+)
+
+ggsave(
+  "./../figures/agg_dly_attention_ntr.png", 
+  p_agg_dly_attention_ntr, 
+  "png", 
+  units = "cm", 
+  width = 9, 
+  height = 4.5
+)
+
+ggsave(
+  "./../figures/agg_dly_attention_weighted_ntr.png", 
+  p_agg_dly_attention_weighted_ntr, 
+  "png", 
+  units = "cm", 
+  width = 9, 
+  height = 4.5
+)
+```
+
+# Aggregate ASVI
+
+```{r}
+agg_dly_asvi <- df %>%
+  filter(!is.na(dly_asvi)) %>%
+  group_by(date) %>%
+  summarise(
+    agg_dly_asvi = mean(dly_asvi)
+  )
+
+agg_dly_svi_vol <- df %>%
+  filter(!is.na(dly_svi_vol)) %>%
+  group_by(date) %>%
+  summarise(
+    agg_dly_svi_vol = mean(dly_svi_vol)
+  )
+
+agg_dly_asvi_vol <- df %>%
+  filter(!is.na(dly_asvi_vol)) %>%
+  group_by(date) %>%
+  summarise(
+    agg_dly_asvi_vol = mean(dly_asvi_vol)
+  )
+
+agg_weekly_asvi <- df %>%
+  filter(!is.na(weekly_asvi)) %>%
+  group_by(n_weeks) %>%
+  summarise(
+    agg_weekly_asvi = mean(weekly_asvi)
+  )
+
+plot_search_volume(agg_dly_asvi, y = "agg_dly_asvi")
+plot_search_volume(agg_weekly_asvi, x = "n_weeks", y = "agg_weekly_asvi")
+plot_search_volume(agg_dly_svi_vol, y = "agg_dly_svi_vol")
+plot_search_volume(agg_dly_asvi_vol, y = "agg_dly_asvi_vol")
+```
+

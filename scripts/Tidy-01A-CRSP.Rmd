@@ -1,0 +1,80 @@
+---
+title: "Tidy-01A-CRSP"
+author: "David Barkemeyer"
+date: "2023-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Daily CRSP
+
+```{r}
+crsp_daily_raw <- read_csv("./../large_data/crsp_daily_raw.csv") %>%
+  suppressMessages()
+
+crsp_daily <- crsp_daily_raw %>%
+  distinct() %>%
+  mutate(
+    date = ymd(DlyCalDt), 
+    start_date = ymd(SecurityBegDt),
+    end_date = ymd(SecurityEndDt)
+  ) %>%
+  select(
+    date, start_date, end_date,
+    ticker = Ticker,
+    exchange = PrimaryExch,
+    industry = SICCD,
+    prc = DlyPrc,
+    prc_factor = DlyFacPrc,
+    ret = DlyRet,
+    volume = DlyVol,
+    open = DlyOpen,
+    close = DlyClose,
+    low = DlyLow,
+    high = DlyHigh,
+    shares_outstanding = ShrOut,
+    share_class = ShareClass
+  ) %>%
+  filter(
+    is.na(share_class) | share_class == "A"
+  ) %>%
+  distinct()
+
+write_rds(crsp_daily, "./../large_data/crsp_daily.rds")
+```
+
+# Monthly CRSP
+
+```{r}
+crsp_monthly_raw <- read_csv("./../large_data/crsp_monthly_raw.csv") %>%
+  suppressMessages()
+
+crsp_monthly <- crsp_monthly_raw %>% 
+  distinct() %>%
+  mutate(
+    date = ym(YYYYMM), 
+    start_date = ymd(SecurityBegDt),
+    end_date = ymd(SecurityEndDt)
+  ) %>%
+  select(
+    date, start_date, end_date,
+    ticker = Ticker,
+    exchange = PrimaryExch,
+    industry = SICCD,
+    prc = MthPrc,
+    ret = MthRet,
+    volume = MthVol,
+    shares_outstanding = ShrOut,
+    share_class = ShareClass
+  ) %>%
+  filter(
+    is.na(share_class) | share_class == "A"
+  ) %>%
+  distinct()
+
+write_rds(crsp_monthly, "./../large_data/crsp_monthly.rds")
+```
+

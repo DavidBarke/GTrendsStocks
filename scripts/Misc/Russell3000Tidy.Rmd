@@ -1,0 +1,67 @@
+---
+title: "Russell3000Tidy"
+author: "David Barkemeyer"
+date: "2023-03-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Russell 3000
+
+```{r}
+library(readr)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+years <- 2004:2023
+
+for (year in years) {
+  read_xlsx(
+    path = paste0("./../inst/extdata/russell_3000/R3000_", year, ".xlsx")
+  ) %>%
+    select(ticker = Ticker, name = Name) %>%
+    mutate(ticker = str_extract(ticker, "^\\w+")) %>%
+    filter(!str_detect(ticker, "\\d")) %>%
+    write_csv(
+      file = paste0("./../inst/extdata/russell_3000/members_", year, ".csv")
+    )
+}
+```
+
+# S&P 500
+
+```{r}
+library(readr)
+library(readxl)
+library(dplyr)
+library(stringr)
+library(purrr)
+
+years <- 2004:2023
+
+for (year in years) {
+  read_xlsx(
+    path = paste0("./../inst/extdata/sp_500/SPX_", year, ".xlsx")
+  ) %>%
+    select(ticker = Ticker, name = Name) %>%
+    mutate(ticker = str_extract(ticker, "^\\w+")) %>%
+    filter(!str_detect(ticker, "\\d")) %>%
+    write_csv(
+      file = paste0("./../inst/extdata/sp_500/members_", year, ".csv")
+    )
+}
+
+sp500 <- map_dfr(years, function(year) {
+  read_csv(
+    file = paste0("./../inst/extdata/sp_500/members_", year, ".csv")
+  ) %>% 
+    suppressMessages() %>%
+    mutate(year = year)
+}) %>%
+  group_by(ticker, name) %>%
+  summarise(first_year = min(year), last_year = max(year))
+```

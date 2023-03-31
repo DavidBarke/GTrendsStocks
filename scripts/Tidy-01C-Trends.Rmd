@@ -1,0 +1,76 @@
+---
+title: "TidyTrends"
+author: "David Barkemeyer"
+date: "2023-03-12"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Scale Individual Trends
+
+```{r}
+library(purrr)
+library(stringr)
+library(readr)
+library(glue)
+library(lubridate)
+library(yaml)
+library(GTrendsStocks)
+library(dplyr)
+
+options <- read_yaml(params$options)
+
+stocks <- map(LETTERS, function(first_letter) {
+  dir(paste0("./../trends/sp_500_raw/", first_letter)) %>%
+    str_extract("\\w+")
+}) %>% list_c
+
+save_dir <- paste0(
+    "./../trends/sp_500_scaled_", options$time_start, "_", options$time_end
+)
+if (!dir.exists(save_dir)) {
+  dir.create(save_dir)
+  walk(file.path(save_dir, LETTERS), dir.create)
+}
+
+walk(stocks, function(stock) {
+  first_letter <- substr(stock, 1, 1)
+  trends <- read_rds(glue("./../trends/sp_500_raw/{first_letter}/{stock}.rds")) %>%
+    mutate(
+      date = ymd(date)
+    ) %>%
+    filter(
+      date >= as.Date(options$time_start), 
+      date <= as.Date(options$time_end)
+    ) %>%
+    scale_trends() %>%
+    save_trends(stock, basedir = save_dir)
+})
+```
+
+# Merge scaled trends
+
+```{r}
+trends_raw <- map_dfr(stocks, function(stock) {
+  first_letter <- substr(stock, 1, 1)
+  read_rds(
+    glue("./../trends/{paste_time('sp_500_scaled', options)}/{first_letter}/{stock}.rds")
+  )
+})
+
+trends <- trends_raw %>%
+  mutate(
+    score = ifelse(score < 0, 0, score), 
+    date = ymd(date),
+    ticker = str_extract(keyword, "^\\w+")
+  ) %>%
+  select(date, dly_attention = score, ticker)
+
+write_rds(trends, file.path("./../large_data", paste_time0(options), "trends.rds"))
+```
+

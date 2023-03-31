@@ -1,0 +1,31 @@
+#' @export
+col_names_605 <- function() {
+  c(
+    "designated_participant",
+    "market_center",
+    "date",
+    "ticker",
+    "order_type",
+    "order_size",
+    "total_covered_orders",
+    "total_covered_shares",
+    "cancelled_shares",
+    "market_center_exectuted_shares",
+    "away_executed_shares",
+    "shares_0_9_seconds",
+    "shares_10_29_seconds",
+    "shares_30_50_seconds",
+    "shares_60_299_seconds",
+    "shares_5_30_minutes",
+    "average_realized_spread_$",
+    "average_effective_spread_$",
+    "price_improved_shares",
+    "price_improved_average_amount_$",
+    "price_improved_average_time_s",
+    "at_the_quote_shares",
+    "at_the_quote_average_time_s",
+    "outside_the_quote_shares",
+    "outside_the_quote_average_amount_$",
+    "outside_the_quote_average_time_s"
+  )
+}

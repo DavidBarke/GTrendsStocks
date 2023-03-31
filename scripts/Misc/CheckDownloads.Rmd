@@ -1,0 +1,27 @@
+---
+title: "CheckDownloads"
+author: "David Barkemeyer"
+date: "2023-03-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(purrr)
+library(stringr)
+
+downloaded <- map(LETTERS, function(LETTER) {
+  files <- dir(path = paste0("./../trends/sp_500_raw/", LETTER))
+  stocks <- str_extract(files, "^\\w+")
+}) %>% list_c() 
+
+stocks <- unique(sp_500()$ticker)
+
+missing <- setdiff(stocks, downloaded)
+
+relevant_stocks <- downloaded
+```
+

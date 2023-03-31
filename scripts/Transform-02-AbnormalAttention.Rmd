@@ -1,0 +1,114 @@
+---
+title: "Transform-02-AbnormalAttention"
+author: "David Barkemeyer"
+date: "2023-03-16"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+```
+
+# Load previous data in transform pipeline
+
+```{r}
+library(readr)
+library(dplyr, exclude = "lag")
+library(yaml)
+library(GTrendsStocks)
+
+options <- read_yaml(params$options)
+
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-01-AbnormalReturns.rds"
+  )
+)
+```
+
+# Compute weekly attention by averaging
+
+```{r}
+# Add column to data containing the number of weeks since Sunday, 1999-12-27
+df_2 <- df %>%
+  mutate(
+    n_weeks = difftime(date, as.Date("1999-12-27")) %>% as.numeric %/% 7
+  )
+
+# Weekly average attention
+weekly_attention <- df_2 %>%
+  group_by(n_weeks, ticker) %>%
+  summarise(
+    weekly_attention = mean(dly_attention, na.rm = T)
+  ) %>%
+  mutate(
+    weekly_attention = if_else(
+      is.nan(weekly_attention), NA_real_, weekly_attention
+    )
+  ) %>%
+  ungroup()
+```
+
+# Weekly ASVI 
+
+Abnormal search volume is the difference between the current week's search volume and the median over the eight last weeks. 
+
+$ASVI_t = \log(SVI_t) - \log[Med(SVI_{t-1},...,SVI_{t-8})]$
+
+```{r}
+weekly_asvi <- weekly_attention %>%
+  group_by(ticker) %>%
+  arrange(n_weeks) %>%
+  filter(!is.na(weekly_attention)) %>%
+  mutate(
+    weekly_asvi = log(weekly_attention) - 
+      log(median_attention(weekly_attention, n_weeks, 7))
+  )
+```
+
+# Join asvi and weekly_attention back to data
+
+```{r}
+df_3 <- df_2 %>%
+  full_join(weekly_asvi, by = c("ticker", "n_weeks"))
+```
+
+# Daily ASVI and SVI volatility
+
+```{r}
+dly_asvi <- df_3 %>%
+  select(date, ticker, dly_attention) %>%
+  distinct(date, ticker, .keep_all = T) %>%
+  filter(!is.na(dly_attention)) %>%
+  group_by(ticker) %>%
+  arrange(date) %>%
+  mutate(
+    dly_asvi = 
+      log(dly_attention) - log(median_attention(dly_attention, as.numeric(date), 42)),
+    dly_svi_vol = TTR::runSD(dly_attention, n = 21),
+    dly_asvi_vol = log(dly_svi_vol) - log(median_attention(dly_svi_vol, as.numeric(date), 42))
+  ) %>%
+  select(date, ticker, dly_asvi, dly_svi_vol, dly_asvi_vol)
+  
+df_4 <- df_3 %>%
+  left_join(dly_asvi, by = c("ticker", "date"))
+```
+
+# Save data
+
+```{r}
+write_rds(
+  df_4, 
+  file.path(
+    "./../large_data", 
+    paste_time0(options), 
+    "Transform-02-AbnormalAttention.rds"
+  )
+)
+```
+
+
+
+

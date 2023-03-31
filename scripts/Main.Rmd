@@ -1,0 +1,62 @@
+---
+title: "Main"
+author: "David Barkemeyer"
+date: "2023-03-28"
+output: html_document
+params:
+  output_dir: tempdir()
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages
+
+```{r}
+library(rmarkdown)
+```
+
+# Tidy
+
+```{r}
+render(
+  "./scripts/Tidy-01A-CRSP.Rmd",
+  output_dir = params$output_dir
+)
+
+render(
+  "./scripts/Tidy-01B-Compustat.Rmd",
+  output_dir = params$output_dir
+)
+
+render(
+  "./scripts/Tidy-01C-Trends.Rmd",
+  output_dir = params$output_dir
+)
+
+render(
+  "./scripts/Tidy-01D-Dash-5.Rmd",
+  output_dir = params$output_dir
+)
+```
+
+# Transform
+
+```{r}
+render(
+  "./scripts/Transform-02-AbnormalReturns.Rmd", 
+  output_dir = params$output_dir
+)
+
+render(
+  "./scripts/Transform-02-AbnormalAttention.Rmd", 
+  output_dir = params$output_dir
+)
+
+render(
+  "./scripts/Transform-03-AbnormalTurnover.Rmd", 
+  output_dir = params$output_dir
+)
+```
+

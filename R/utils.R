@@ -63,3 +63,28 @@ switch_cookies <- function() {
   # Assume that TOR is running on 9050
   assign("handle_proxyhost", "socks5://localhost:9050", envir = gtrendsR:::.pkgenv)
 }
+
+#' @export
+average_return <- function(ret) {
+  ret <- ret[!is.na(ret)]
+  prod(1 + ret)^(1/length(ret)) - 1
+}
+
+#' @export
+week_start <- function(n_weeks, origin = as.Date("1999-12-27")) {
+  origin + lubridate::days(7) * n_weeks
+}
+
+#' @export
+paste_time <- function(x, options) {
+  if (!length(x) || nchar(x) == 0) {
+    paste0(options$time_start, "_", options$time_end)
+  } else {
+    paste0(x, "_", options$time_start, "_", options$time_end)
+  }
+}
+
+#' @export
+paste_time0 <- function(options) {
+  paste0(options$time_start, "_", options$time_end)
+}

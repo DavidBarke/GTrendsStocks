@@ -1,0 +1,38 @@
+---
+title: "TidyCompustat"
+author: "David Barkemeyer"
+date: "2023-03-12"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+library(lubridate)
+
+df <- read_csv("./../large_data/compustat_raw.csv") %>%
+  suppressMessages()
+
+df_2 <- df %>%
+  select(
+    date = datadate,
+    fiscal_year = fyear,
+    ticker = tic,
+    market_value = mkvalt,
+    book_value_per_share = bkvlps,
+    shares_outstanding = csho,
+    exchange = exchg,
+    active = costat
+  ) %>%
+  mutate(
+    date = ymd(date),
+    book_to_market = (book_value_per_share * shares_outstanding) / market_value
+  )
+
+write_rds(df_2, "./../large_data/compustat.rds")
+```
+

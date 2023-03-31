@@ -1,0 +1,70 @@
+---
+title: "Transform-03-AbnormalTurnover"
+author: "David Barkemeyer"
+date: "2023-03-28"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Abnormal Turnover 
+
+## Packages
+
+```{r}
+library(GTrendsStocks)
+library(yaml)
+library(readr)
+library(lubridate)
+
+options <- read_yaml(params$options)
+```
+
+## Import
+
+```{r}
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-02-AbnormalAttention.rds"
+  )
+)
+```
+
+## Standardize turnover according to Chordia et al. (2007)
+
+```{r}
+turnover <- df %>%
+  filter(!is.na(volume), volume > 0) %>%
+  select(date, ticker, turnover = volume) %>%
+  arrange(date) %>%
+  mutate(
+    month = month(date)
+  ) %>%
+  group_by(ticker) %>%
+  mutate(
+    t = match(date, unique(date)),
+    abn_turnover = detrend_chordia_2007(turnover, month, t),
+    log_abn_turnover = detrend_chordia_2007(log(turnover), month, t)
+  ) %>%
+  select(date, ticker, abn_turnover, log_abn_turnover)
+
+df_2 <- full_join(df, turnover, by = c("date", "ticker"))
+```
+
+## Save data
+
+```{r}
+write_rds(
+  df_2, 
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-03-AbnormalTurnover.rds"
+  )
+)
+```
+
+
+

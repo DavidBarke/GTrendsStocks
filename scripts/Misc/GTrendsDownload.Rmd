@@ -1,0 +1,40 @@
+---
+title: "GTrendsDownload"
+author: "David Barkemeyer"
+date: "2023-03-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(purrr)
+library(lubridate)
+library(progress)
+
+pb <- progress::progress_bar$new(
+  total = nrow(sp_500()),
+  format = "Downloading :ticker - :name [:bar] :current/:total"
+)
+
+pwalk(
+  sp_500() %>% filter(first_year < 2023, ticker %in% missing), 
+  function(ticker, name, first_year, last_year
+) {
+  pb$tick(tokens = list(ticker = ticker, name = name))
+  
+  interval_start <- paste0(first_year, "-01-01")
+  interval_end <- paste0(last_year, "-12-31")
+  if (last_year == 2023) interval_end <- "2022-12-31"
+  
+  trends <- download_trends(
+    keywords = paste(ticker, "STOCK"), 
+    interval(interval_start, interval_end)
+  ) %>%
+    save_trends(ticker, basedir = "./../trends/sp_500_raw") %>%
+    scale_trends() %>%
+    save_trends(ticker, basedir = "./../trends/sp_500_scaled")
+})
+```

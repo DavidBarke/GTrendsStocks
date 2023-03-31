@@ -1,0 +1,160 @@
+---
+title: "Talk_23-03-31"
+author: "David Barkemeyer"
+date: "2023-03-31"
+output: html_document
+params:
+  options: "./../scripts/options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(yaml)
+library(GTrendsStocks)
+library(readr)
+library(ggplot2)
+library(dplyr)
+
+options <- read_yaml(params$options)
+
+df <- read_rds(file.path("./../large_data", paste_time0(options), "Transform-03-AbnormalTurnover.rds"))
+```
+
+# Feedback
+
+## Market Sentiment
+
+* Clarification: sentiment of retail investors towards the market?
+
+##  Algorithmic Trading
+
+HFT volume
+
+* 2000: 10%
+* 2009: 61%
+* 2012: 50%
+
+I still need to figure out whether HFT trades are included in Dash-5 reports and, if yes, whether it is possible to exclude them.
+
+# Issues
+
+## Data availability
+
+Dash-5 data only available for the last 10 years
+
+## Zero-attention observations
+
+```{r}
+zero_obs_ratio <- df %>% 
+  group_by(ticker) %>% 
+  filter(!is.na(dly_attention)) %>% 
+  summarise(
+    ratio = sum(dly_attention == 0) / n(), 
+    market_cap = mean(market_cap)
+  )
+
+ggplot(zero_obs_ratio, aes(x = ratio)) +
+  labs(x = "Percentage of zero-attention observations", y = "Frequency", title = "All days") +
+  geom_histogram(bins = 10) +
+  theme_bw()
+
+zero_obs_ratio <- df %>% 
+  group_by(ticker) %>% 
+  filter(!is.na(dly_attention), !is.na(ret)) %>% 
+  summarise(
+    ratio = sum(dly_attention == 0) / n(),
+    market_cap = mean(market_cap)
+  )
+
+ggplot(zero_obs_ratio, aes(x = ratio)) +
+  labs(x = "Percentage of zero-attention observations", y = "Frequency", title = "Trading-days") +
+  geom_histogram(bins = 10) +
+  theme_bw()
+```
+
+
+# Methodology
+
+Do I want to show that investor behavior has changed over time or do I want to show a general mechanism?
+
+## Change in behavior
+
+* Hypothesis: impact of abnormal attention on future abnormal returns is shorter
+* No clear event definition
+
+## General mechanism
+
+* Show impact of attention volatility and attention frequency on future stock returns
+
+## Yearly summary statistics
+
+### All days
+
+```{r}
+yss_all <- df %>%
+  filter(!is.na(dly_attention)) %>%
+  group_by(period) %>%
+  summarise(
+    dly_attention %>% 
+      summary %>% 
+      as.list %>% 
+      as_tibble %>% 
+      select(`1st Qu.`, Median, Mean, `3rd Qu.`)
+  )
+
+yss_all
+```
+
+### Trading days
+
+```{r}
+yss_td <- df %>%
+  filter(!is.na(dly_attention), !is.na(ret)) %>%
+  group_by(period) %>%
+  summarise(
+    dly_attention %>% 
+      summary %>% 
+      as.list %>% 
+      as_tibble %>% 
+      select(`1st Qu.`, Median, Mean, `3rd Qu.`)
+  )
+
+yss_td
+```
+
+# All days (zeros removed)
+
+```{r}
+yss_all_nz <- df %>%
+  filter(!is.na(dly_attention), dly_attention != 0) %>%
+  group_by(period) %>%
+  summarise(
+    dly_attention %>% 
+      summary %>% 
+      as.list %>% 
+      as_tibble %>% 
+      select(`1st Qu.`, Median, Mean, `3rd Qu.`)
+  )
+
+yss_all_nz
+```
+
+# Trading days (zeros removed)
+
+```{r}
+yss_td_nz <- df %>%
+  filter(!is.na(dly_attention), !is.na(ret), dly_attention != 0) %>%
+  group_by(period) %>%
+  summarise(
+    dly_attention %>% 
+      summary %>% 
+      as.list %>% 
+      as_tibble %>% 
+      select(`1st Qu.`, Median, Mean, `3rd Qu.`)
+  )
+
+yss_td_nz
+```

@@ -149,6 +149,8 @@ download_trends <- function(
 
 #' @export
 scale_trends <- function(trends) {
+  trends$score <- pmax(trends$score, 0)
+
   chunks <- sort(unique(trends$chunk))
 
   for (chunk in chunks[-length(chunks)]) {
@@ -169,7 +171,7 @@ scale_trends <- function(trends) {
       dplyr::pull(score)
 
     scaling_factor <- mean(scores_1 / scores_2, na.rm = TRUE)
-    if (is.nan(scaling_factor)) scaling_factor <- 1
+    if (is.nan(scaling_factor) || scaling_factor == 0) scaling_factor <- 1
 
     if (scaling_factor > 1) {
       trends[trends$chunk <= chunk_1, ]$score <-
