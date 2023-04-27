@@ -129,10 +129,28 @@ df_4 <- df_3 %>%
   )
 ```
 
+# Filter market and marketable limit orders
+
+```{r}
+df_5 <- df_4 %>%
+  filter(order_type %in% c("Market order", "Marketable limit order"))
+```
+
+# Aggregate covered shares
+
+```{r}
+df_6 <- df_5 %>%
+  group_by(year, month, ticker) %>%
+  summarise(
+    total_covered_orders = sum(total_covered_orders, na.rm = T),
+    total_covered_shares = sum(total_covered_shares, na.rm = T)
+  )
+```
+
 # Save data
 
 ```{r}
-write_rds(df_4, "./../large_data/dash-5.rds")
+write_rds(df_6, "./../large_data/dash-5.rds")
 ```
 
 

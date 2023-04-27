@@ -93,7 +93,8 @@ download_trends <- function(
     chunk_duration = lubridate::days(160),
     overlap = lubridate::days(80),
     geo = "US",
-    interest_only = TRUE
+    interest_only = TRUE,
+    sleep = 0
 ) {
   stopifnot(lubridate::is.interval(int))
 
@@ -101,12 +102,9 @@ download_trends <- function(
   end_date <- lubridate::int_end(int)
   ints <- int_split(int, chunk_duration = chunk_duration)
 
-  # Get new cookies for every download
-  # switch_cookies()
-
   purrr::map_dfr(keywords, function(keyword) {
     purrr::map2_dfr(ints, seq_along(ints), function(int, i) {
-      print(glue::glue("Download {keywords} at {int}"))
+      print(glue::glue("Download {keywords} at {int} + {overlap@day} days overlap"))
 
       trends <- gtrendsR::gtrends(
         keyword = keyword,
@@ -141,7 +139,7 @@ download_trends <- function(
           )
       }
 
-      #Sys.sleep(1)
+      Sys.sleep(sleep)
       trends
     })
   })

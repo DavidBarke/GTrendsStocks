@@ -88,3 +88,12 @@ paste_time <- function(x, options) {
 paste_time0 <- function(options) {
   paste0(options$time_start, "_", options$time_end)
 }
+
+#' @export
+mean2 <- function(x) {
+  x <- x[!is.na(x)]
+  s <- sd(x)
+  m <- mean(x)
+  x <- x[x <= m + 3 * s & x >= m - 3 * s]
+  mean(x)
+}

@@ -61,10 +61,10 @@ $ASVI_t = \log(SVI_t) - \log[Med(SVI_{t-1},...,SVI_{t-8})]$
 weekly_asvi <- weekly_attention %>%
   group_by(ticker) %>%
   arrange(n_weeks) %>%
-  filter(!is.na(weekly_attention)) %>%
+  filter(!is.na(weekly_attention), weekly_attention > 0) %>%
   mutate(
-    weekly_asvi = log(weekly_attention) - 
-      log(median_attention(weekly_attention, n_weeks, 7))
+    weekly_asvi = log(weekly_attention) -
+      log(median_attention(weekly_attention, n_weeks, 8))
   )
 ```
 
@@ -79,16 +79,16 @@ df_3 <- df_2 %>%
 
 ```{r}
 dly_asvi <- df_3 %>%
-  select(date, ticker, dly_attention) %>%
+  select(date, ticker, dly_attention, ret) %>%
   distinct(date, ticker, .keep_all = T) %>%
-  filter(!is.na(dly_attention)) %>%
+  filter(!is.na(dly_attention), dly_attention > 0, !is.na(ret)) %>%
   group_by(ticker) %>%
   arrange(date) %>%
   mutate(
     dly_asvi = 
-      log(dly_attention) - log(median_attention(dly_attention, as.numeric(date), 42)),
-    dly_svi_vol = TTR::runSD(dly_attention, n = 21),
-    dly_asvi_vol = log(dly_svi_vol) - log(median_attention(dly_svi_vol, as.numeric(date), 42))
+      log(dly_attention) - log(median_attention(dly_attention, as.numeric(date), 8)),
+    dly_svi_vol = sd_attention(dly_attention, 38),
+    dly_asvi_vol = log(dly_svi_vol) - log(median_attention(dly_svi_vol, as.numeric(date), 38))
   ) %>%
   select(date, ticker, dly_asvi, dly_svi_vol, dly_asvi_vol)
   

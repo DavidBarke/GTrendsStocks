@@ -1,0 +1,111 @@
+---
+title: "Analyse-01-SummaryStatistics"
+author: "David Barkemeyer"
+date: "2023-04-18"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages + Options
+
+```{r}
+library(GTrendsStocks)
+library(yaml)
+library(readr)
+library(lubridate)
+library(stargazer)
+
+options <- read_yaml(params$options)
+```
+
+# Import
+
+```{r}
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-02-AbnormalAttention.rds"
+  )
+)
+
+df_abn_ret <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-01-AbnormalReturns.rds"
+  )
+)
+```
+
+# Trading days vs. non-trading days
+
+```{r}
+df_abn_ret %>%
+  filter(!is.na(dly_attention)) %>%
+  mutate(day_type = ifelse(!is.na(ret), "Trading day", "Non-trading day")) %>%
+  group_by(day_type) %>%
+  summarise(n = n()) %>%
+  mutate(ratio = n / sum(n))
+```
+
+# Non-zero observations
+
+```{r}
+df_abn_ret %>%
+  filter(!is.na(dly_attention), !is.na(ret)) %>%
+  mutate(is_zero = dly_attention == 0) %>%
+  group_by(is_zero) %>%
+  summarise(n = n()) %>%
+  mutate(ratio = n / sum(n))
+```
+
+# Summary statistics
+
+```{r}
+df_2 <- df %>%
+  filter(!is.na(dly_attention), !is.na(ret), dly_attention > 0, !is.na(dly_asvi)) %>%
+  select(date, ticker, dly_attention, volume, ret, dly_asvi) %>%
+  mutate(
+    ss_period = case_when(
+      date <= "2008-06-30" ~ "01/2004-06/2008",
+      date >= "2010-02-01" & date <= "2013-03-31" ~ "02/2010-03/2013",
+      date >= "2013-04-01" & date <= "2016-03-31" ~ "04/2013-03/2016",
+      date >= "2020-03-01" ~ "03/2020-12/2022",
+      .default = "else"
+    )
+  ) 
+
+df_3 <- df_2 %>%
+  group_by(ss_period) %>%
+  summarise(
+    stargazer = list(
+      stargazer(
+        data.frame(
+          `SVI` = dly_attention,
+          `ASVI` = dly_asvi
+        ),
+        summary = TRUE,
+        summary.stat = c("min", "max", "median", "mean", "sd")
+      ) %>% capture.output()
+    )
+  )
+
+df_2 %>%
+  group_by(ss_period) %>%
+  summarise(
+    n = n(),
+    min_dly_asvi = min(dly_asvi),
+    max_dly_asvi = max(dly_asvi),
+    sd_dly_asvi = sd(dly_asvi),
+    mean_dly_asvi = mean(dly_asvi),
+    median_dly_asvi = median(dly_asvi),
+    min_dly_svi = min(dly_attention),
+    max_dly_svi = max(dly_attention),
+    sd_dly_svi = sd(dly_attention),
+    mean_dly_svi = mean(dly_attention),
+    median_dly_svi = median(dly_attention)
+  )
+```
+

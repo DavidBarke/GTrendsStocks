@@ -1,0 +1,87 @@
+---
+title: "Transform-04-PercentDash5Volume"
+author: "David Barkemeyer"
+date: "2023-04-18"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages + Options
+
+```{r}
+library(GTrendsStocks)
+library(yaml)
+library(readr)
+library(lubridate)
+
+options <- read_yaml(params$options)
+```
+
+# Import
+
+```{r}
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-03-AbnormalTurnover.rds"
+  )
+)
+
+dash_5 <- read_rds(
+  file.path("./../large_data/dash-5.rds")
+)
+```
+
+# Compute monthly volume
+
+```{r}
+df_2 <- df %>%
+  mutate(
+    year = year(date),
+    month = month(date)
+  ) %>%
+  group_by(year, month, ticker) %>%
+  mutate(monthly_volume = sum(volume, na.rm = T)) %>%
+  ungroup()
+```
+
+# Join Dash-5 data
+
+```{r}
+df_3 <- left_join(df_2, dash_5, by = c("year", "month", "ticker"))
+```
+
+# Compute Percent Dash-5 Volume
+
+```{r}
+df_4 <- df_3 %>%
+  mutate(
+    percent_dash_5 = total_covered_shares / monthly_volume
+  )
+```
+
+# Remove obviously wrong observations
+
+Percentage should be always less than 1.
+
+```{r}
+df_5 <- df_4 %>%
+  mutate(percent_dash_5 = ifelse(percent_dash_5 > 1, NA, percent_dash_5))
+```
+
+# Save data
+
+```{r}
+write_rds(
+  df_5, 
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-04-PercentDash5Volume.rds"
+  )
+)
+```
+
+

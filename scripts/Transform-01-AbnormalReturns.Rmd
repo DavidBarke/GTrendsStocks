@@ -59,6 +59,8 @@ size <- crsp_trends %>%
     size = prc * shares_outstanding
   ) %>%
   select(ticker, period, size) %>%
+  mutate(n = n()) %>%
+  filter(n == 1) %>%
   ungroup()
 ```
 
@@ -67,7 +69,10 @@ size <- crsp_trends %>%
 ```{r}
 book_to_market <- compustat %>%
   mutate(period = year(date) + 1) %>%
-  select(ticker, period, book_to_market)
+  select(ticker, period, book_to_market) %>%
+  group_by(period, ticker) %>%
+  mutate(n = n()) %>%
+  filter(n == 1)
 ```
 
 
@@ -121,14 +126,14 @@ data <- inner_join(ct, factors, by = c("ticker", "period"))
 To follow the approach of Daniel et al. (1997) the size quintiles are computed based on NYSE stocks.
 
 ```{r}
-probs <- seq(0, 1, by = 0.2) # quintile probabilities
+probs <- seq(0, 1, by = 0.5) # quartile probabilities
 
 # Compute size quintiles per twelve-month period
 size_quintiles <- data %>%
   filter(exchange == "N") %>%
   select(date, period, ticker, size) %>%
   group_by(period) %>%
-  summarise(size_5 = list(quantile(size, probs = probs)))
+  summarise(size_4 = list(quantile(size, probs = probs)))
 
 # Join size quintiles to ticker-period-size data
 data_2 <- data %>%
@@ -139,9 +144,9 @@ data_2 <- data %>%
 # Compute bin in which ticker-size combination is put per period
 data_3 <- data_2 %>%
   rowwise() %>%
-  mutate(size_q = findInterval(size, size_5, all.inside = T)) %>%
+  mutate(size_q = findInterval(size, size_4, all.inside = T)) %>%
   ungroup() %>%
-  select(-size_5)
+  select(-size_4)
 ```
 
 ## Portfolios on book-to-market
@@ -154,7 +159,7 @@ book_to_market_quintiles <- data_3 %>%
   filter(!is.na(book_to_market)) %>%
   group_by(size_q, period) %>%
   summarise(
-    book_to_market_5 = list(quantile(book_to_market, probs = probs))
+    book_to_market_4 = list(quantile(book_to_market, probs = probs))
   ) %>%
   suppressMessages()
 
@@ -167,11 +172,11 @@ data_5 <- data_4 %>%
   rowwise() %>%
   mutate(
     book_to_market_q = findInterval(
-      book_to_market, book_to_market_5, all.inside = T
+      book_to_market, book_to_market_4, all.inside = T
     )
   ) %>%
   ungroup() %>%
-  select(-book_to_market_5)
+  select(-book_to_market_4)
 ```
 
 ## Portfolios on momentum
@@ -181,7 +186,7 @@ data_5 <- data_4 %>%
 momentum_quintiles <- data_5 %>%
   filter(!is.na(momentum)) %>%
   group_by(period, size_q, book_to_market_q) %>%
-  summarise(momentum_5 = list(quantile(momentum, probs = probs))) %>%
+  summarise(momentum_4 = list(quantile(momentum, probs = probs))) %>%
   suppressMessages()
 
 # Join momentum quintiles to ticker-period-size_q data
@@ -194,9 +199,9 @@ data_6 <- data_5 %>%
 # Compute bin in which ticker-size_q-momentum combination is put per period
 data_7 <- data_6 %>%
   rowwise() %>%
-  mutate(momentum_q = findInterval(momentum, momentum_5, all.inside = T)) %>%
+  mutate(momentum_q = findInterval(momentum, momentum_4, all.inside = T)) %>%
   ungroup() %>%
-  select(-momentum_5)
+  select(-momentum_4)
 ```
 
 # Merge portfolio information with CRSP & trend data
@@ -210,7 +215,7 @@ ct_2 <- ct %>%
 
 ```{r}
 ct_3 <- ct_2 %>%
-  group_by(period, size_q, book_to_market_q, momentum_q) %>%
+  group_by(date, size_q, book_to_market_q, momentum_q) %>%
   mutate(pf_ret = mean(ret, na.rm = TRUE)) %>%
   ungroup()
 ```

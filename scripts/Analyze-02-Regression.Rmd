@@ -1,0 +1,201 @@
+---
+title: "Analyze-02-Regression"
+author: "David Barkemeyer"
+date: "2023-04-19"
+output: html_document
+params:
+  options: "./options.yaml"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Packages + Options
+
+```{r}
+library(GTrendsStocks)
+library(yaml)
+library(readr)
+library(lubridate)
+library(stargazer)
+library(purrr)
+library(broom)
+library(tidyr)
+
+options <- read_yaml(params$options)
+```
+
+# Import
+
+```{r}
+df <- read_rds(
+  file.path(
+    "./../large_data", paste_time0(options), "Transform-04-PercentDash5Volume.rds"
+  )
+)
+```
+
+# ASVI and S&P 500 Stock Returns
+
+```{r}
+df_2 <- df %>%
+  select(date, ticker, dly_asvi, abn_ret, market_cap, percent_dash_5, abn_turnover, ret) %>%
+  filter(!is.na(ret), !is.na(dly_asvi)) %>%
+  group_by(ticker) %>%
+  arrange(date) %>%
+  mutate(
+    abn_ret_1_ = dplyr::lead(abn_ret, 1),
+    abn_ret_2_ = dplyr::lead(abn_ret, 2),
+    abn_ret_3_ = dplyr::lead(abn_ret, 3),
+    abn_ret_4_ = dplyr::lead(abn_ret, 4),
+    abn_ret_5_ = dplyr::lead(abn_ret, 5)
+  ) %>%
+  filter(!is.na(abn_ret_5_)) %>%
+  mutate(
+    log_market_cap = log(market_cap),
+    abs_abn_ret = abs(abn_ret)
+  ) %>%
+  ungroup() %>%
+  rowwise() %>%
+  mutate(
+    abn_ret_1 = abn_ret_1_,
+    abn_ret_2 = average_return(c(abn_ret_1_, abn_ret_2_)),
+    abn_ret_3 = average_return(c(abn_ret_1_, abn_ret_2_, abn_ret_3_)),
+    abn_ret_4 = average_return(
+      c(abn_ret_1_, abn_ret_2_, abn_ret_3_, abn_ret_4_)
+    ),
+    abn_ret_5 = average_return(
+      c(abn_ret_1_, abn_ret_2_, abn_ret_3_, abn_ret_4_, abn_ret_5_)
+    )
+  ) %>%
+  ungroup() %>%
+  group_by(ticker) %>%
+  mutate(
+    across(
+      c(abn_ret_1, abn_ret_2, abn_ret_3, abn_ret_4, abn_ret_5),
+      function(x) x - mean(x, na.rm = T)
+    ),
+    across(
+      c(dly_asvi, log_market_cap, percent_dash_5, abs_abn_ret, abn_turnover),
+      function(x) (x - mean(x, na.rm = T)) / sd(x, na.rm = T)
+    )
+  ) %>%
+  select(
+    -c(market_cap, ret, abn_ret_1_, abn_ret_2_, abn_ret_3_, abn_ret_4_, abn_ret_5_)
+  ) %>%
+  ungroup()
+```
+
+# Time-series regression
+
+```{r}
+df_3 <- df_2 %>% 
+  select(-percent_dash_5) %>%
+  nest(
+    data = c(
+      date, abn_ret, abn_ret_1, abn_ret_2, abn_ret_3, abn_ret_4, abn_ret_5,
+      #percent_dash_5,
+      dly_asvi, log_market_cap, abs_abn_ret, abn_turnover
+    )
+  )
+
+df_4 <- df_3 %>%
+  filter(ticker != "HAR") %>%
+  mutate(
+    estimates = map(
+      data,
+      ~ tidy(
+        lm(
+          1e4 * abn_ret_5 ~ 
+            dly_asvi + 
+            log_market_cap * dly_asvi + 
+            log_market_cap + 
+            #percent_dash_5 * dly_asvi + 
+            #percent_dash_5 + 
+            abs_abn_ret + 
+            abn_turnover - 
+            1, 
+          data = .x
+        )
+      )
+    )
+  ) %>%
+  unnest(estimates)
+```
+
+# Cross-sectional aggregation
+
+```{r}
+df_5 <- df_4 %>%
+  group_by(term) %>%
+  summarise(
+    coef = mean(estimate, na.rm = T),
+    sd = sd(estimate, na.rm = T),
+    n = n(),
+    t_statistic = mean(estimate, na.rm = T) / sd(estimate, na.rm = T) * sqrt(n()),
+    summary = list(summary(estimate))
+  )
+```
+
+# Fama-MacBeth
+
+```{r}
+mb_1 <- df_4 %>% 
+  select(ticker, term, estimate) %>%
+  pivot_wider(
+    names_from = term,
+    values_from = estimate
+  )
+
+mb_2 <- df_2 %>%
+  select(date, ticker, abn_ret_5)
+
+mb_3 <- full_join(mb_2, mb_1, by = "ticker")
+
+mb_4 <- mb_3 %>%
+  nest(data = c(
+    ticker, abn_ret_5, dly_asvi, log_market_cap, 
+    #percent_dash_5, `dly_asvi:percent_dash_5`,
+    abs_abn_ret, abn_turnover, `dly_asvi:log_market_cap`
+  )) %>%
+  mutate(
+    estimates = map(
+      data,
+      safely(~ tidy(
+        lm(
+          1e4 * abn_ret_5 ~ 
+            dly_asvi + 
+            `dly_asvi:log_market_cap` + 
+            log_market_cap + 
+            #`dly_asvi:percent_dash_5` + 
+            #percent_dash_5 + 
+            abs_abn_ret + 
+            abn_turnover - 1,
+          data = .x
+        )
+      ))
+    )
+  ) %>%
+  rowwise() %>%
+  filter(is.null(estimates$error)) %>%
+  ungroup()
+
+mb_5 <- mb_4 %>%
+  rowwise() %>%
+  mutate(estimates = list(estimates$result)) %>%
+  unnest(estimates)
+
+mb_6 <- mb_5 %>%
+  group_by(term) %>%
+  summarise(
+    coef = mean(estimate, na.rm = T),
+    std_err = sd(estimate, na.rm = T) / sqrt(n()),
+    t_statistic = mean(estimate, na.rm = T) / sd(estimate, na.rm = T) * sqrt(n())
+  )
+```
+
+```{r}
+qnorm(c(0.9, 0.95, 0.99))
+```
+

@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(purrr)
 library(lubridate)
 library(progress)
+library(GTrendsStocks)
 
 pb <- progress::progress_bar$new(
   total = nrow(sp_500()),
@@ -20,7 +21,7 @@ pb <- progress::progress_bar$new(
 )
 
 pwalk(
-  sp_500() %>% filter(first_year < 2023, ticker %in% missing), 
+  sp_500() %>% filter(first_year < 2023, ticker >= "AVY"), 
   function(ticker, name, first_year, last_year
 ) {
   pb$tick(tokens = list(ticker = ticker, name = name))
@@ -31,10 +32,13 @@ pwalk(
   
   trends <- download_trends(
     keywords = paste(ticker, "STOCK"), 
-    interval(interval_start, interval_end)
+    interval(interval_start, interval_end),
+    chunk_duration = lubridate::days(1000),
+    overlap = lubridate::days(500),
+    sleep = 0
   ) %>%
-    save_trends(ticker, basedir = "./../trends/sp_500_raw") %>%
+    save_trends(ticker, basedir = "./../../trends/sp_500_raw_2004-01-01_2022-12-31_weekly") %>%
     scale_trends() %>%
-    save_trends(ticker, basedir = "./../trends/sp_500_scaled")
+    save_trends(ticker, basedir = "./../../trends/sp_500_scaled_2004-01-01_2022-12-31_weekly")
 })
 ```

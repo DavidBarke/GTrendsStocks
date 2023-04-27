@@ -2,8 +2,13 @@
 #'
 #' @export
 median_attention <- function(attention, date, n) {
-  #print(attention)
-  #print(date)
+  if (length(attention) < n) return(NA)
+  if (sum(!is.na(attention)) < n) return(NA)
   ts <- zoo::zoo(attention, date)
-  runMedian(ts, n)
+  TTR::runMedian(ts, n)
+}
+
+sd_attention <- function(attention, n) {
+  if (length(attention) < n) return(NA)
+  TTR::runSD(attention, n = n)
 }
